@@ -1,0 +1,30 @@
+name: Release on Tag
+
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Setup .npmrc
+        run: cp .npmrc.example .npmrc && sed -i "s/my_token_here/${{ secrets.GITHUB_TOKEN }}/g" .npmrc
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Release
+        run: chmod +x ./scripts/publish.sh && ./scripts/publish.sh
